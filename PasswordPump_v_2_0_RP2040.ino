@@ -1,3 +1,5 @@
+//See Wiring Image to see how is the Pico to be connected
+
 #define __RP2040__//coment this for M0
 #define ENCODER_NORMAL            0                                             // don't change this.
 #define ENCODER_LEFTY             1                                             // don't change this.
@@ -1214,8 +1216,8 @@ void setup() {                                                                  
   oled.setFont(Arial_bold_14);
   oled.clear();  
   oled.setCursor(0,0);//pos row
-  oled.println("Into the setup()");
-  delay(1000);
+  //oled.println("Into the setup()");
+  //delay(1000);
   oled.clear();
   
   Keyboard.begin(); // test erase
