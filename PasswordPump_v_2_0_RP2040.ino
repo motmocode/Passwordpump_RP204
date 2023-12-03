@@ -1205,6 +1205,7 @@ void OnGetLoginMinutes();
 void OnGetLoginAttempts();
 void OnChangeMasterPass();
 
+void SendCharArray();
 //Keyboard_ Keyboard;                                                             // define the keyboard object
 
 //- Main Program Control
@@ -1220,7 +1221,7 @@ void setup() {                                                                  
   //delay(1000);
   oled.clear();
   
-  Keyboard.begin(); // test erase
+  //--->Keyboard.begin(); // test erase
 
   
   if(DEBUG_ENABLED) {
@@ -1245,19 +1246,21 @@ void setup() {                                                                  
   
  
   analogWrite(RED_PIN, 200);
-  delay(1000);
+  delay(100);
   analogWrite(GREEN_PIN, 200);
-  delay(1000);
+  delay(100);
   analogWrite(BLUE_PIN, 200);
-  delay(1000);
+  delay(100);
   analogWrite(RED_PIN, 0);
-  delay(1000);
+  delay(100);
   analogWrite(GREEN_PIN, 0);
-  delay(1000);
+  delay(100);
   analogWrite(BLUE_PIN, 0);
-  delay(1000);
-  DebugLN("PasswordPump2");
+  delay(100);
   
+  //SendCharArray(); //this works fine: sending a custom text to test the KeyBoard
+  
+  DebugLN("PasswordPump2");
   encoderButton.setReleasedHandler(buttonReleasedHandler);                      // fires when button is released
 
   encoderButton.setDebounceTime(BUTTON_DEBOUNCE_MS);                            // set the button debounce time
@@ -1543,7 +1546,8 @@ void setup() {                                                                  
   DisplayToHelp("Click to begin.");
 
   EnableInterrupts();                                                        // Turn on global interrupts
- 
+  
+  //SendCharArray(); This works fine here too
 }//end setup()                                                                               // end of setup()
 
 int counterloop=0;
@@ -4828,19 +4832,56 @@ void sendWebSite() {
 //}
 
 void sendPassword() {                                                           // TODO: can we do a <CTL><A> <BS> here first? That will clear out pre-populated passwords.
+  DebugLN("sendPassword()");
+  //SendCharArray();
+  //DebugLN("--------------");
   //DebugLN("sendPassword()");
   readPassFromEEProm(acctPosition, password);                                   // read the password from EEProm
   char passwordChar[PASSWORD_SIZE];
   memcpy(passwordChar,password,PASSWORD_SIZE);
+
+  DebugLN(passwordChar);
+  
   Keyboard.begin();
   delayNoBlock(interCharPauseVal);
   uint8_t pos = 0;
+
+  DebugLN(passwordChar);
+  
   while (passwordChar[pos] != NULL_TERM) {
     Keyboard.write(passwordChar[pos++]);
     delayNoBlock(interCharPauseVal);
   }  
   Keyboard.end();
 }
+
+void SendCharArray() { 
+  
+  char my_phrase[]= {'H','e','l','l','o',' ','D','u','d','e','1','\0'};
+  int arr_size = sizeof(my_phrase)/sizeof(my_phrase[0]); //length calculation
+  
+  //-->readPassFromEEProm(acctPosition, password);                                   // read the password from EEProm
+  
+  char passwordChar[arr_size];//char passwordChar[PASSWORD_SIZE];
+  DebugLN("1.SendCharArray()");
+  memcpy(passwordChar, my_phrase ,arr_size);
+  
+  DebugLN("2.SendCharArray()");
+  DebugLN(passwordChar);
+  
+  Keyboard.begin();
+  
+  delayNoBlock(interCharPauseVal);
+  
+  uint8_t pos = 0;
+  DebugLN(passwordChar);
+  while (passwordChar[pos] != NULL_TERM) {
+    Keyboard.write(passwordChar[pos++]);
+    delayNoBlock(interCharPauseVal);
+  }  
+  Keyboard.end();
+}
+
 
 void sendRTN() {
   Keyboard.begin();
