@@ -1546,8 +1546,17 @@ void setup() {                                                                  
   DisplayToHelp("Click to begin.");
 
   EnableInterrupts();                                                        // Turn on global interrupts
-  
+
+
+
+  //sendPassword();
   //SendCharArray(); This works fine here too
+  DebugLN("setup()-->interCharPauseVal");
+  Serial.println(interCharPauseVal);
+  //DebugLN(interCharPauseVal);
+  //String strm = (char*)interCharPauseVal;
+  //DebugLN(strm.c_str());
+  //DebugLN((char*)interCharPauseVal);
 }//end setup()                                                                               // end of setup()
 
 int counterloop=0;
@@ -1561,7 +1570,6 @@ void loop() {                                                                   
   #endif
   ProcessEvent();                                                            // process any events that might have occurred.
 
-  
   /*Keyboard.press('h');
   Keyboard.press('h');
   Keyboard.press(KEY_BACKSPACE);
@@ -1729,15 +1737,44 @@ void pollEncoder() {
 }
 
 void ProcessEvent() {                                                           // processes events
+  //I was here, til here is fine!
+  //DebugLN("Investigating");
+  //sendPassword();   
+  
   if (event != EVENT_NONE) {
+    //I was here, til here is fine!
+    //DebugLN("Investigating1");
+    //sendPassword();
+     
     if (screenBlank) {                                                          // Added 2023-03-18 to prevent screen burn in. Any event turns screenBlank to false and the event is swallowed.
       screenBlank = false;                                                      // Added 2023-03-18 to prevent screen burn in.
       event = EVENT_LONG_CLICK;
     }                                                                           // Added 2023-03-18 to prevent screen burn in. 
+    ////I was here, til here is fine!
+    //DebugLN("Investigating2");
+    //sendPassword(); 
+    
     DisableInterrupts();
     lastActivityTime = millis();                                                // bump up the lastActivityTime, we don't reset iterationCount here, not 
-  } else {                                                                      // event == EVENT_NONE
+
+    //here everythin went wrong!! htu htu hhhhhhhhhh...infinite
+    //DebugLN("Investigating3");
+    //EnableInterrupts();//this should not be here But solves the problem
+    //sendPassword();
+  } 
+  else 
+  {                                                                      // event == EVENT_NONE
+    //I was here, til here is fine! but on the first push botton everythin went wrong
+    //rotating encoder no effect
+    //DebugLN("Investigating");
+    //sendPassword(); 
+    
     EnableInterrupts();
+
+    //I was here, til here is fine! but device blocks (does get any new events!? mybe the DelaynoBlocks does not let more events take place) htuhtuhtu
+    //DebugLN("Investigating");
+    //sendPassword(); 
+    
     if (++iterationCount == MAX_ITERATION_COUNT) {                              // we don't want to call millis() every single time through the loop
       milliseconds = millis();
       iterationCount = 0;                                                       // 
@@ -1802,6 +1839,9 @@ void ProcessEvent() {                                                           
   if        (event == EVENT_ROTATE_CW) {                                        // scroll forward through something depending on state...
     if ((STATE_SHOW_MAIN_MENU == machineState) &&
          authenticated                                                      ) { // this prevents navigation away from 'Enter Master Password' when not 
+      
+     //Was here already, here aleardy broken!
+                                                                                                                                                            
                                                                                 // authenticated.
       if (position < MAIN_MENU_ELEMENTS - 1) {                                  // prevent scrolling past the last item on the menu
         position++;
@@ -4311,7 +4351,7 @@ void switchToSendCredsMenu() {
 }
 
 void switchToFindAcctMenu() {
-  //DebugLN("switchToFindAcctMenu()");
+  DebugLN("switchToFindAcctMenu()");
   machineState = STATE_FIND_ACCOUNT;
   position = acctPosition;                                                      
   ShowMenu(FIND_ACCOUNT, mainMenu, " Find All Accounts  ");
@@ -4756,7 +4796,9 @@ void setSalt(char *uuid, uint8_t size) {
 //- Keyboard Functions
 
 void sendAccount() {
-  //DebugLN("sendAccount()");
+  DebugLN("sendAccount()");
+  EnableInterrupts();
+  
   readAcctFromEEProm(acctPosition, accountName);                                // read the account name from EEProm
   char accountNameChar[ACCOUNT_SIZE];
   memcpy(accountNameChar,accountName,ACCOUNT_SIZE);                             // TODO: is this necessary?
@@ -4773,7 +4815,9 @@ void sendAccount() {
 }
 
 void sendOldPassword() {
-  //DebugLN("sendOldPassword()");
+  DebugLN("sendOldPassword()");
+  EnableInterrupts();
+  
   readOldPassFromEEProm(acctPosition, oldPassword);                             // read the old password from EEProm
   char oldPasswordChar[PASSWORD_SIZE];
   memcpy(oldPasswordChar,oldPassword,PASSWORD_SIZE);                            // TODO: is this necessary?
@@ -4788,7 +4832,9 @@ void sendOldPassword() {
 }
 
 void sendUsername() {
-  //DebugLN("sendUsername()");
+  DebugLN("sendUsername()");
+  EnableInterrupts();
+  
   readUserFromEEProm(acctPosition, username);                                   // read the user name from EEProm
   char usernameChar[USERNAME_SIZE];
   memcpy(usernameChar,username,USERNAME_SIZE);
@@ -4805,7 +4851,9 @@ void sendUsername() {
 }
 
 void sendWebSite() {
-  //DebugLN("sendWebSite()");
+  DebugLN("sendWebSite()");
+  EnableInterrupts();
+  
   readWebSiteFromEEProm(acctPosition, website);                                 // read the URL from EEProm
   char websiteChar[WEBSITE_SIZE];
   memcpy(websiteChar,website,WEBSITE_SIZE);
@@ -4831,23 +4879,18 @@ void sendWebSite() {
 //  Keyboard.end();
 //}
 
-void sendPassword() {                                                           // TODO: can we do a <CTL><A> <BS> here first? That will clear out pre-populated passwords.
+void sendPassword() { 
   DebugLN("sendPassword()");
-  //SendCharArray();
-  //DebugLN("--------------");
-  //DebugLN("sendPassword()");
+  EnableInterrupts();
+  
   readPassFromEEProm(acctPosition, password);                                   // read the password from EEProm
   char passwordChar[PASSWORD_SIZE];
   memcpy(passwordChar,password,PASSWORD_SIZE);
-
-  DebugLN(passwordChar);
-  
+  //DebugLN(passwordChar);
   Keyboard.begin();
   delayNoBlock(interCharPauseVal);
   uint8_t pos = 0;
-
-  DebugLN(passwordChar);
-  
+   
   while (passwordChar[pos] != NULL_TERM) {
     Keyboard.write(passwordChar[pos++]);
     delayNoBlock(interCharPauseVal);
@@ -4856,6 +4899,8 @@ void sendPassword() {                                                           
 }
 
 void SendCharArray() { 
+  DebugLN("SendCharArray()");
+  EnableInterrupts();
   
   char my_phrase[]= {'H','e','l','l','o',' ','D','u','d','e','1','\0'};
   int arr_size = sizeof(my_phrase)/sizeof(my_phrase[0]); //length calculation
@@ -4880,10 +4925,34 @@ void SendCharArray() {
     delayNoBlock(interCharPauseVal);
   }  
   Keyboard.end();
+
+  /*DebugLN("Test-->sendPassword()");
+  interCharPauseVal=25;
+  Serial.println(interCharPauseVal);
+  //String strm = (char*)interCharPauseVal;
+  //DebugLN(strm.c_str());
+  //DebugLN((char*)interCharPauseVal);
+  
+  Keyboard.begin();
+  delayNoBlock(interCharPauseVal);
+  Keyboard.write('h');
+  delayNoBlock(interCharPauseVal);
+  Keyboard.write('t');
+  delay(5);
+  Keyboard.write('u');
+  delay(5);  
+  Keyboard.releaseAll();
+  DebugLN("Done-->sendPassword()");
+  //delay(1000);
+  //DisableInterrupts();
+  Keyboard.end();
+  */
 }
 
 
 void sendRTN() {
+  EnableInterrupts();
+  
   Keyboard.begin();
   delayNoBlock(interCharPauseVal);
   Keyboard.println("");                                                         // send a carriage return through the keyboard
@@ -4892,6 +4961,8 @@ void sendRTN() {
 }
 
 void sendTAB() {
+  EnableInterrupts();
+  
   Keyboard.begin();
   delayNoBlock(interCharPauseVal);
   Keyboard.press(TAB_KEY);                                                      // if style isn't default or "0" then send <TAB>
@@ -4902,7 +4973,9 @@ void sendTAB() {
 }
 
 void sendLockAndLogout() {                                                      
-  //DebugLN("sendLockAndLogout()");
+  DebugLN("sendLockAndLogout()");
+  EnableInterrupts();
+  
   Keyboard.begin();
   delayNoBlock(interCharPauseVal);
   Keyboard.press(KEY_LEFT_GUI);
@@ -4915,7 +4988,9 @@ void sendLockAndLogout() {
 }
 
 void sendUsernameAndPassword() {
-  //DebugLN("sendUsernameAndPassword()");
+  DebugLN("sendUsernameAndPassword()");
+  EnableInterrupts();
+  
   readUserFromEEProm(acctPosition, username);                                   // read the user name from EEProm
   char usernameChar[USERNAME_SIZE];
   memcpy(usernameChar,username,USERNAME_SIZE);
